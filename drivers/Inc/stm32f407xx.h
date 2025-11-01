@@ -12,6 +12,24 @@
 
 #define __vo volatile
 /*
+ * ARM Cortex Mx processor NVIC ISERx register addreses
+ */
+#define NVIC_ISER0				( (__vo uint32_t*)0xE000E100 )
+#define NVIC_ISER1				( (__vo uint32_t*)0xE000E104 )
+#define NVIC_ISER2				( (__vo uint32_t*)0xE000E108 )
+#define NVIC_ISER3				( (__vo uint32_t*)0xE000E10C )
+
+#define NVIC_PR_BASE_ADDR		( (__vo uint32_t*)0xE000E400 )
+#define NO_PR_BITS_IMPLEMENTED	4
+/*
+ * ARM Cortex Mx processor NVIC ICERx register addreses
+ */
+#define NVIC_ICER0				( (__vo uint32_t*)0XE000E180 )
+#define NVIC_ICER1				( (__vo uint32_t*)0xE000E184 )
+#define NVIC_ICER2				( (__vo uint32_t*)0xE000E188 )
+#define NVIC_ICER3				( (__vo uint32_t*)0xE000E18C )
+
+/*
  * base addresses of flash and SRAM memories
  */
 #define FLASH_BASEADDR			0x08000000U // U for unsigned int
@@ -39,7 +57,9 @@
 #define GPIOG_BASEADDR			(AHB1PERIPH_BASE + 0x1800)
 #define GPIOH_BASEADDR			(AHB1PERIPH_BASE + 0x1C00)
 #define GPIOI_BASEADDR			(AHB1PERIPH_BASE + 0x2000)
+
 #define RCC_BASEADDR			(AHB1PERIPH_BASE + 0x3800)
+
 /*
  * base addresses of peripherals that are hangin on apb1
  */
@@ -119,6 +139,38 @@ typedef struct
 	__vo uint32_t CKGATENR;
 	__vo uint32_t DCKCFGR2;
 }RCC_RegDef_t;
+
+
+/*
+ * peripheral register definition for EXTI
+ */
+typedef struct
+{
+	__vo uint32_t IMR;
+	__vo uint32_t EMR;
+	__vo uint32_t RTSR;
+	__vo uint32_t FTSR;
+	__vo uint32_t SWIER;
+	__vo uint32_t PR;
+
+}EXTI_RegDef_t;
+
+
+/*
+ * peripheral register definition for SYSCFG
+ */
+typedef struct
+{
+	__vo uint32_t MEMRMP;
+	__vo uint32_t PMC;
+	__vo uint32_t EXTICR[4];
+	uint32_t RESERVED[2];
+	__vo uint32_t CMPCR;
+	uint32_t RESERVED2[2];
+	__vo uint32_t CFGR;
+
+}SYSCFG_RegDef_t;
+
 /*
  * peripheral definitions
  */
@@ -134,6 +186,9 @@ typedef struct
 
 #define RCC						((RCC_RegDef_t*)RCC_BASEADDR)
 
+#define EXTI					((EXTI_RegDef_t*)EXTI_BASEADDR)
+#define SYSCFG					((SYSCFG_RegDef_t*)SYSCFG_BASEADDR)
+
 /*
  * Clock Enable Macros for GPIOx peripherals
  */
@@ -145,6 +200,12 @@ typedef struct
 #define GPIOF_PCLK_EN() ( RCC->AHB1ENR |= (1 << 5) )
 #define GPIOG_PCLK_EN() ( RCC->AHB1ENR |= (1 << 6) )
 #define GPIOH_PCLK_EN() ( RCC->AHB1ENR |= (1 << 7) )
+
+/*
+ * Clock Enable Macros for SYSCFG peripheral
+ */
+
+#define SYSCFG_PCLK_EN() ( RCC->APB2ENR |= (1 << 14) )
 
 /*
  * Clock Enable Macros for I2C peripherals
@@ -199,6 +260,25 @@ typedef struct
 #define GPIOF_REG_RESET() do{ ( RCC->AHB1RSTR |= ~(1 << 5) );  ( RCC->AHB1RSTR &= ~(1 << 5) ); }while(0)
 #define GPIOG_REG_RESET() do{ ( RCC->AHB1RSTR |= ~(1 << 6) );  ( RCC->AHB1RSTR &= ~(1 << 6) ); }while(0)
 #define GPIOH_REG_RESET() do{ ( RCC->AHB1RSTR |= ~(1 << 7) );  ( RCC->AHB1RSTR &= ~(1 << 7) ); }while(0)
+
+
+/*
+ * Return port code for given GPIOx base addr
+ */
+#define GPIO_BASEADDR_TO_CODE(x)	((x == GPIOA) ? 0 :\
+									(x == GPIOB) ? 1 :\
+									(x == GPIOC) ? 2 :\
+									(x == GPIOD) ? 3 :\
+									(x == GPIOE) ? 4 :\
+									(x == GPIOF) ? 5 :\
+									(x == GPIOG) ? 6:0)
+#define IRQ_NO_EXTI0	6
+#define IRQ_NO_EXTI2	8
+#define IRQ_NO_EXTI3	9
+#define IRQ_NO_EXTI4	10
+#define IRQ_NO_EXTI9_5	23
+#define IRQ_NO_EXTI10	40
+
 
 // Some generic macros
 #define ENABLE 			1
