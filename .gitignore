@@ -1,0 +1,36 @@
+# Build artifacts
+*.o
+*.d
+*.elf
+*.map
+*.bin
+*.hex
+*.axf
+*.lst
+*.out
+
+# IDE-specific folders
+.project
+.cproject
+.settings/
+.metadata/
+*.launch
+
+# STM32CubeIDE and Eclipse
+Debug/
+Release/
+build/
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Makefile-generated files
+*.dep
+*.cmd
+*.su
+
+# Temporary files
+*.swp
+*~
