@@ -1,5 +1,5 @@
 ## Setup
 
 - Target: STM32F407 Discovery Board
-- IDE: STM32CubeIDE / Eclipse with GNU ARM toolchain
+- IDE: STM32CubeIDE
 - Language: C
