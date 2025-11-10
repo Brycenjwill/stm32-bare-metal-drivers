@@ -301,6 +301,9 @@ typedef struct
 #define IRQ_NO_EXTI5_9	23
 #define IRQ_NO_EXTI10	40
 
+#define IRQ_SPI1		35
+#define IRQ_SPI2		36
+
 #define NVIC_IRQ_PRI0	0
 #define NVIC_IRQ_PRI1	1
 #define NVIC_IRQ_PRI2	2

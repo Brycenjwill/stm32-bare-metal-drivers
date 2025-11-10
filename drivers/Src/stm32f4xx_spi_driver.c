@@ -181,14 +181,53 @@ uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint32_t FlagName)
  */
 void SPI_IRQITConfig(uint8_t IRQNumber, uint8_t EnorDi)
 {
+	// Only need to use up to ISER2 since there are only 82 IRQ numbers supported by stm32F4.
+	if(EnorDi == ENABLE)
+	{
+		if(IRQNumber < 32)
+		{
+			//ISER0
+			*NVIC_ISER0 |= ( 1 << IRQNumber );
 
+		}else if (IRQNumber < 64)
+		{
+			//ISER1
+			*NVIC_ISER1 |= ( 1 << (IRQNumber % 32) );
+
+		}else if (IRQNumber < 96)
+		{
+			//ISER2
+			*NVIC_ISER2 |= ( 1 << (IRQNumber % 64) );
+
+		}
+	}
+	else
+	{
+		if(IRQNumber < 32)
+		{
+			//ISER0
+			*NVIC_ICER0 |= ( 1 << IRQNumber );
+
+		}else if (IRQNumber < 64)
+		{
+			//ISER1
+			*NVIC_ICER1 |= ( 1 << (IRQNumber % 32) );
+
+		}else if (IRQNumber < 96)
+		{
+			//ISER2
+			*NVIC_ICER2 |= ( 1 << (IRQNumber % 64) );
+
+		}
+	}
 }
+
 void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority)
 {
-
-}
-void SPI_IRQHandling(SPI_Handle_t *pHandle)
-{
+	uint8_t whichIprRegister = IRQNumber / 4;
+	uint8_t whichIprSection= IRQNumber % 4;
+	uint8_t shiftAmt = (8 * whichIprSection) + ( 8- NO_PR_BITS_IMPLEMENTED);
+	*(NVIC_PR_BASE_ADDR + whichIprRegister) |= (IRQPriority << shiftAmt);
 
 }
 
