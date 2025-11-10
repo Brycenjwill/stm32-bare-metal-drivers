@@ -141,7 +141,32 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len)
 }
 void SPI_RecieveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len)
 {
+	// Blocking api. Will wait until len bytes are transmitted.
+	while(Len > 0)
+	{
+		//1. wait until rxne is set (transmit buffer is empty)
+		while (SPI_GetFlagStatus(pSPIx, SPI_RXNE_FLAG) == FLAG_RESET);
 
+		//2. Check the DFF bit in CR1
+		if(pSPIx->CR1 & (1 << SPI_CR1_DFF))
+		{
+			//16 bit DFF
+			//1. Load the data into the DR
+			 *((uint16_t*) pRxBuffer) = pSPIx->DR;
+			Len--;
+			Len--;
+			//Increment the buffer
+			(uint16_t*) pRxBuffer++;
+		}
+		else
+		{
+			//8 bit DFF
+			*pRxBuffer = pSPIx->DR;
+			Len--;
+			//Increment the buffer
+			pRxBuffer++;
+		}
+	}
 }
 uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint32_t FlagName)
 {
