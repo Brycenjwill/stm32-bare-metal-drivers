@@ -254,6 +254,18 @@ void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi)
 	}
 }
 
+void  SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+{
+	if(EnOrDi == ENABLE)
+	{
+		pSPIx->CR2 |=  (1 << SPI_CR2_SSOE);
+	}else
+	{
+		pSPIx->CR2 &=  ~(1 << SPI_CR2_SSOE);
+	}
+
+
+}
 
 
 
