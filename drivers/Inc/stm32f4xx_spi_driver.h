@@ -57,6 +57,16 @@ typedef struct
 #define SPI_SSM_EN		1
 #define SPI_SSM_DI		0
 
+#define SPI_READY		0
+#define SPI_BUSY_IN_RX	1
+#define SPI_BUSY_IN_TX	2
+
+// Possible spi applicatoin events
+#define SPI_EVENT_TX_COMPLETE	1
+#define SPI_EVENT_RX_COMPLETE	2
+#define SPI_EVENT_OVR_ERR		3
+#define SPI_EVENT_CRC_ERR		4
+
 #define SPI_RXNE_FLAG	( 1 << SPI_SR_RXNE )
 #define SPI_TXE_FLAG	( 1 << SPI_SR_TXE )
 #define SPI_CHSIDE_FLAG	( 1 << SPI_SR_CHSIDE )
@@ -74,6 +84,12 @@ typedef struct
 {
 	SPI_RegDef_t *pSPIx;
 	SPI_Config_t SPIConfig;
+	uint8_t		*pTxBuffer;
+	uint8_t		*pRxBuffer;
+	uint32_t 	TxLen;
+	uint32_t 	RxLen;
+	uint32_t 	TxState;
+	uint32_t 	RxState;
 
 }SPI_Handle_t;
 
@@ -96,11 +112,17 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx);
 void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len);
 void SPI_RecieveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len);
 
+uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t Len);
+uint8_t SPI_RecieveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t Len);
+
+
 /*
  * IRC Configuration and handling
  */
 void SPI_IRQITConfig(uint8_t IRQNumber, uint8_t EnorDi);
 void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority);
+void SPI_IRQHandling(SPI_Handle_t *pHandle);
+
 
 uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint32_t FlagName);
 
