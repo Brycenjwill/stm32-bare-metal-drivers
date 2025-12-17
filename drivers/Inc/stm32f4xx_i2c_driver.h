@@ -39,7 +39,7 @@ typedef struct
 #define I2C_FM_DUTY_16_9	1
 
 // I2C Peri Enable bit
-#define I2C_CR1_SPE 1
+#define I2C_CR1_SPE 0
 
 // status flags
 #define I2C_FLAG_TXE   		( 1 << I2C_SR1_TXE)

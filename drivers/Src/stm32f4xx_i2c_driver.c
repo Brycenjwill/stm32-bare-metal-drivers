@@ -30,7 +30,7 @@ uint32_t RCC_GetPCLK1Value(void)
 
 	if(clksrc == 0)
 	{
-		SystemClk = 1600000;
+		SystemClk = 16000000;
 	} else if(clksrc == 1)
 	{
 		SystemClk = 8000000;
@@ -44,7 +44,7 @@ uint32_t RCC_GetPCLK1Value(void)
 
 	if(temp < 8)
 	{
-		ahbp = 0;
+		ahbp = 1;
 	} else
 	{
 		ahbp = AHB_PreScalar[temp - 8];
@@ -55,7 +55,7 @@ uint32_t RCC_GetPCLK1Value(void)
 
 	if(temp < 4)
 	{
-		apbp1 = 0;
+		apbp1 = 1;
 	} else
 	{
 		apbp1 = APB1_PreScalar[temp - 4];
@@ -115,16 +115,20 @@ void I2C_Init(I2C_Handle_t *pI2CHandle)
 
 	uint32_t tempreg = 0;
 
+	//enable the clock for the i2cx peripheral
+	I2C_PeriClockControl(pI2CHandle->pI2Cx,ENABLE);
+
 	// ack control bit init (it doesn't automatically ack by default)
 	tempreg |= pI2CHandle->I2C_Config.I2C_ACKControl << 10;
 	pI2CHandle->pI2Cx->CR1 = tempreg;
 
 	// freq init
 	tempreg = 0;
-	tempreg |= RCC_GetPCLK1Value() / 10000000;
-	pI2CHandle->pI2Cx->CR2 = (tempreg & 0x3F); // first 5 bits are freq
+	tempreg |= RCC_GetPCLK1Value() / 1000000U;
+	pI2CHandle->pI2Cx->CR2 |= (tempreg & 0x3F); // first 5 bits are freq
 
 	// device address
+	tempreg = 0;
 	tempreg |= pI2CHandle->I2C_Config.I2C_DeviceAddress << 1;
 	tempreg |= (1 << 14);
 	pI2CHandle->pI2Cx->OAR1 = tempreg;
@@ -136,8 +140,8 @@ void I2C_Init(I2C_Handle_t *pI2CHandle)
 	if(pI2CHandle->I2C_Config.I2C_SCLSpeed <= I2C_SCL_SPEED_SM)
 	{
 		// mode is standard
-		ccr_value = RCC_GetPCLK1Value() / (2 * pI2CHandle->I2C_Config.I2C_SCLSpeed);
-		tempreg = (ccr_value & 0xFFF);
+		ccr_value |= RCC_GetPCLK1Value() / (2 * pI2CHandle->I2C_Config.I2C_SCLSpeed);
+		tempreg |= (ccr_value & 0xFFF);
 	} else
 	{
 		// mode is fast
@@ -151,20 +155,22 @@ void I2C_Init(I2C_Handle_t *pI2CHandle)
 		{
 			ccr_value = RCC_GetPCLK1Value() / (25 * pI2CHandle->I2C_Config.I2C_SCLSpeed);
 		}
-		tempreg = (ccr_value & 0xFFF);
+		tempreg |= (ccr_value & 0xFFF);
 	}
 
 	pI2CHandle->pI2Cx->CCR = tempreg;
 
+	tempreg = 0;
+
 	if(pI2CHandle->I2C_Config.I2C_SCLSpeed <= I2C_SCL_SPEED_SM)
 	{
 		// mode is standard
-		tempreg = (RCC_GetPCLK1Value() / 1000000U) + 1;
+		tempreg |= (RCC_GetPCLK1Value() / 1000000U) + 1;
 
 	} else
 	{
 		// mode is fast
-		tempreg = ((RCC_GetPCLK1Value() * 300) / 1000000000U) + 1;
+		tempreg |= ((RCC_GetPCLK1Value() * 300) / 1000000000U) + 1;
 	}
 	pI2CHandle->pI2Cx->TRISE = (tempreg & 0x3F);
 
@@ -292,13 +298,13 @@ void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t L
 	I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
 
 	// Check SB flag in SR1 to confirm start is set
-	while(I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_FLAG_SB));
+	while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_FLAG_SB));
 
 	// Send the address of the slave with read / write bit set (8th bit)
 	I2C_ExAddressPhaseWrite(pI2CHandle->pI2Cx, SlaveAddr);
 
 	// Check ADDR flag to check that address phase is completed
-	while(I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_FLAG_ADDR));
+	while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_FLAG_ADDR));
 
 	// Clear the addr flag
 	I2C_ClearADDRFlag(pI2CHandle->pI2Cx);
