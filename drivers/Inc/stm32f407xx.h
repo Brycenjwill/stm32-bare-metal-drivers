@@ -342,6 +342,9 @@ typedef struct
 #define NVIC_IRQ_PRI14	14
 #define NVIC_IRQ_PRI15	15
 
+#define IRQ_NO_I2C1_EV     31
+#define IRQ_NO_I2C1_ER     32
+
 //SPI bit positions
 #define SPI_CR1_CPHA		0
 #define SPI_CR1_CPOL		1

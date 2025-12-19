@@ -22,6 +22,14 @@ typedef struct
 {
 	I2C_RegDef_t *pI2Cx;
 	I2C_Config_t I2C_Config;
+	uint8_t 	*pTxBuffer;
+	uint8_t 	*pRxBuffer;
+	uint32_t 	TxLen;
+	uint32_t 	RxLen;
+	uint8_t 	TxRxState;
+	uint8_t 	DevAddr;
+    uint32_t    RxSize;
+    uint8_t     Sr;
 }I2C_Handle_t;
 
 // I2C Clk Speed
@@ -70,13 +78,24 @@ void I2C_DeInit(I2C_RegDef_t *pI2Cx);
  * Data send and recieve
  */
 void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t Len, uint8_t SlaveAddr);
+void I2C_MasterRecieveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t Sr);
+
+uint8_t I2C_MasterSendDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t Sr);
+uint8_t I2C_MasterRecieveDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t Sr);
+/*
+ * I2C application states
+ */
+#define I2C_READY 					0
+#define I2C_BUSY_IN_RX 				1
+#define I2C_BUSY_IN_TX 				2
 
 /*
  * IRC Configuration and handling
  */
 void I2C_IRQITConfig(uint8_t IRQNumber, uint8_t EnorDi);
 void I2C_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority);
-
+void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle);
+void I2C_ER_IRQHandling(I2C_Handle_t *pI2CHandle);
 
 /*
  * Other peripheral control APIs
